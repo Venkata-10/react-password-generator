@@ -13,10 +13,10 @@ const App = () => {
   const [password, setPassword] = useState('')
 
   useEffect(() => {
-      generatePassword()
+      generatePassword(passwordPattern)
   },[passwordPattern])
 
-  const generatePassword = () => {
+  const generatePassword = (passwordPattern) => {
     const capitals = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     const smalls = 'abcdefghijklmnopqrstuvwxyz'
     const numbers  = '0123456789'
@@ -35,15 +35,36 @@ const App = () => {
     }
 
     let createPassword = ""
-    for(let i = 0; i < passwordPattern.passwordLength; i++){
+
+    if(passwordPattern.includeUpperCase){
+      createPassword += capitals.charAt(Math.floor(Math.random() * capitals.length));
+    }
+    if(passwordPattern.includeLowerCase){
+       createPassword += smalls.charAt(Math.floor(Math.random() * smalls.length));
+    }
+    if(passwordPattern.includeNumbers){
+      createPassword += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    }
+    if(passwordPattern.includeSpecialCharacters){
+      createPassword += specials.charAt(Math.floor(Math.random() * specials.length));
+    }
+
+    const exactLength = passwordPattern.passwordLength - createPassword.length
+
+    for(let i = 0; i < exactLength; i++){
       const index = Math.floor(Math.random() * chars.length)
       createPassword += chars[index]
     }
+
+    createPassword = createPassword.split('').sort(() => Math.random() - 0.5).join('');
 
     setPassword(createPassword)
   }
 
   const copyPassword = () => {
+    if(!password){
+      return
+    }
     navigator.clipboard.writeText(password)
     toast.success('Passoword Copied Successfully')
   }
@@ -52,8 +73,12 @@ const App = () => {
      <div className="App">
         <h1>Password Generator</h1>
           <div className="output">
-            <input type="text" value={password} readOnly/>
-            <button onClick={copyPassword}>Copy</button>
+            <input 
+              type="text" 
+              value={password} 
+              readOnly
+            />
+            <button onClick={() => copyPassword()}>Copy</button>
           </div>
          <div className="controls">
           <div className=".form-group">
@@ -108,7 +133,7 @@ const App = () => {
               Include Special Characters
             </label>
           </div>
-          <button onClick={() => generatePassword()}>Generate Password</button>
+          <button onClick={() => generatePassword(passwordPattern)}>Generate Password</button>
         </div>
         <ToastContainer />
     </div>
